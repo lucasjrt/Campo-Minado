@@ -1,7 +1,5 @@
 package jrt;
 
-import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -23,9 +21,12 @@ public class Game {
 	JTextField txtWidth, txtHeight;
 	JButton btnContinue, btnExit;
 	GroupLayout layout;
+	Style style;
 	Window window;
 	public static void main(String[] args) {
-		new Game();
+		//new Game();
+		GameOver go = new GameOver();
+		go.open();
 	}
 	
 	public Game() {
@@ -39,6 +40,7 @@ public class Game {
 		frame       = new JFrame("Campo minado");
 		panel       = new JPanel();
 		layout      = new GroupLayout(panel);
+		style       = new Style();
 		
 		border = new EmptyBorder(0, 5, 10, 5);
 		lblSize.setBorder(border);
@@ -75,15 +77,14 @@ public class Game {
 		
 		layout.linkSize(SwingConstants.HORIZONTAL, btnExit, btnContinue);
 		
-		prepareButton(btnContinue);
-		prepareButton(btnExit);
-		prepareTextField(txtHeight);
-		prepareTextField(txtWidth);
-		prepareLabel(lblSize);
-		prepareLabel(lblHeight);
-		prepareLabel(lblWidth);
-		
-		panel.setBackground(new Color(65, 105, 225));
+		style.preparePanel(panel);
+		style.prepareButton(btnContinue);
+		style.prepareButton(btnExit);
+		style.prepareTextField(txtHeight);
+		style.prepareTextField(txtWidth);
+		style.prepareLabel(lblSize);
+		style.prepareLabel(lblHeight);
+		style.prepareLabel(lblWidth);
 		
 		frame.add(panel);
 		frame.pack();
@@ -104,27 +105,9 @@ public class Game {
 					window = new Window(Integer.parseInt(txtWidth.getText()), Integer.parseInt(txtHeight.getText()));
 				} else {
 					JOptionPane.showMessageDialog(null, "Altura ou largura inválido, o valor deve estar entre 5 e 30", "ERRO", JOptionPane.ERROR_MESSAGE);
-				}
-				
+				}	
 			}
 		});
-		
-	}
-	void prepareButton(JButton button) {
-		button.setBackground(new Color(255, 165, 0));
-		button.setBorderPainted(false);
-		button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-	}
-	
-	void prepareTextField(JTextField textField) {
-		textField.setBorder(null);
-		textField.setBackground(new Color(135, 206, 250));
-		textField.setSelectionColor(Color.BLUE);
-		textField.setSelectedTextColor(Color.WHITE);
-	}
-	
-	void prepareLabel(JLabel label) {
-		label.setForeground(Color.WHITE);
 	}
 	
 	boolean isInteger(String text) {

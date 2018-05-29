@@ -38,7 +38,7 @@ public class Window {
 		frame.pack();
 	}
 	
-	void buttonsAdd(JButton[][] buttons, JPanel panel) {
+	private void buttonsAdd(JButton[][] buttons, JPanel panel) {
 		for(int i = 0; i < height; i++) {
 			for(int j = 0; j < width; j++) {
 				c.gridx = j;

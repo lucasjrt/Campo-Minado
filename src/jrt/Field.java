@@ -15,15 +15,10 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 public class Field {
-	BufferedImage tiles, unopenedTile, openedTile, flagTile, bombTile;
-	BufferedImage[] numberTiles;
-	BufferedImage extraTiles, clickedTile, grayishFlagTile;
+	private BufferedImage tiles, unopenedTile, openedTile, flagTile, bombTile, clickedBombTile;
+	private BufferedImage[] numberTiles;
 	
-	//ImageIcon iconUnopenedTile, iconOpenedTile, iconFlagTile, iconBombTile;
-	//ImageIcon[] iconNumberTiles;
-	//ImageIcon iconClickedTile, iconGrayishFlagTile;
-	
-	Tile buttons[][];
+	private Tile buttons[][];
 	private Property field[][];
 	private int buttonSize, numBombs, width, height;
 	
@@ -69,31 +64,23 @@ public class Field {
 		
 		try {
 			tiles = ImageIO.read(getClass().getResource("minesweeper_tiles.jpg"));
-			
+			clickedBombTile = ImageIO.read(getClass().getResource("clicked_bomb_tile.jpg"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		//BufferedImage tiles, unopenedTile, openedTile, flagTile, bombTile;
-		//BufferedImage oneTile, twoTile, threeTile, fourTile, fiveTile, sixTile, sevenTile, eightTile;
-		//BufferedImage extraTiles, clickedTile, grayishFlagTile;
 		
 		unopenedTile = resize(tiles.getSubimage(0, 0, 128, 128), buttonSize, buttonSize);
 		flagTile = resize(tiles.getSubimage(128, 0, 128, 128), buttonSize, buttonSize);
 		bombTile = resize(tiles.getSubimage(256, 0, 128, 128), buttonSize, buttonSize);
 		openedTile = resize(tiles.getSubimage(384, 0, 128, 128), buttonSize, buttonSize);
-		
+		clickedBombTile = resize(clickedBombTile.getSubimage(0, 0, 128, 128), buttonSize, buttonSize);
 		
 		numberTiles[0] = openedTile;
 		numberTiles[1] = resize(tiles.getSubimage(0, 128, 128, 128), buttonSize, buttonSize);
-		//iconNumberTiles[0] = new ImageIcon(numberTiles[0]);
 		
 		for(int i = 1;  i < 8; i++) {
 			numberTiles[i+1] = resize(tiles.getSubimage((128 * i) % 512, 128 + (128 * (int) (i / 4)), 128, 128), buttonSize, buttonSize);
 		}
-		
-		//iconUnopenedTile = new ImageIcon(unopenedTile);
-		//iconFlagTile = new ImageIcon(flagTile);
 		
 		for(int i = 0; i < height; i++) {
 			for(int j = 0; j < width; j++) {
@@ -138,13 +125,15 @@ public class Field {
 								if(verifyAdjBombs(button.getI(), button.getJ()) > 0)
 									button.setIconImage(numberTiles[verifyAdjBombs(button.getI(), button.getJ())]);
 								else {
+									button.setIconImage(numberTiles[0]);
+									field[button.getI()][button.getJ()] = Property.CLEAR_OPENED;
 									recursion(button.getI(), button.getJ());
 								}
 								field[button.getI()][button.getJ()] = Property.CLEAR_OPENED;
 							} else if (field[button.getI()][button.getJ()] == Property.BOMB_UNOPENED) {
-								button.setIconImage(bombTile);
+								button.setIconImage(clickedBombTile);
 								field[button.getI()][button.getJ()] = Property.BOMB_OPENED;
-								// TODO gameOver();
+								gameOver();
 							}
 						}
 					}
@@ -194,7 +183,7 @@ public class Field {
 		}
 	}
 	
-	private static BufferedImage resize(BufferedImage img, int height, int width) {
+	private BufferedImage resize(BufferedImage img, int height, int width) {
         Image tmp = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
         BufferedImage resized = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = resized.createGraphics();
@@ -326,5 +315,19 @@ public class Field {
 				}
 			}
 		}
+	}
+	
+	private void gameOver() {
+		for(int i = 0; i < height; i++) {
+			for(int j = 0; j < width; j++) {
+				if(field[i][j] == Property.BOMB_UNOPENED) {
+					field[i][j] = Property.BOMB_OPENED;
+					buttons[i][j].setIconImage(bombTile);
+				}
+			}
+		}
+		
+		GameOver gameOver = new GameOver();
+		gameOver.open();
 	}
 }
