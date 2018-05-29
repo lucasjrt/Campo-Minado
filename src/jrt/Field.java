@@ -11,26 +11,27 @@ import java.io.IOException;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 public class Field {
 	private BufferedImage tiles, unopenedTile, openedTile, flagTile, bombTile, clickedBombTile;
 	private BufferedImage[] numberTiles;
-	
+	private JFrame windowFrame;
 	private Tile buttons[][];
 	private Property field[][];
 	private int buttonSize, numBombs, width, height;
 	
-	public Field(int width, int height) {
+	public Field(int width, int height, JFrame windowFrame) {
+		this.windowFrame = windowFrame;
 		this.buttonSize = 28;
 		this.numBombs = (int) (width * height * .15);
 		this.width = width;
 		this.height = height;
-		this.field = new Property[height][width]; //0 = clear unopened, 1 = bomb unopened, 2 = clear opened, 3 = bomb opened 
+		this.field = new Property[height][width]; 
 		this.buttons = new Tile[height][width];
 		this.numberTiles = new BufferedImage[9];
-		//this.iconNumberTiles = new ImageIcon[8];
 		createField();
 		createBombs();
 		prepareButtons(buttons);
@@ -323,11 +324,17 @@ public class Field {
 				if(field[i][j] == Property.BOMB_UNOPENED) {
 					field[i][j] = Property.BOMB_OPENED;
 					buttons[i][j].setIconImage(bombTile);
+				} else {
+					field[i][j] = Property.GAME_OVER;
 				}
 			}
 		}
 		
-		GameOver gameOver = new GameOver();
+		GameOver gameOver = new GameOver(width, height, this.windowFrame);
 		gameOver.open();
+	}
+	
+	public JFrame getWindowFrame() {
+		return windowFrame;
 	}
 }

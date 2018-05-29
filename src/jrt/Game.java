@@ -24,9 +24,7 @@ public class Game {
 	Style style;
 	Window window;
 	public static void main(String[] args) {
-		//new Game();
-		GameOver go = new GameOver();
-		go.open();
+		new Game();
 	}
 	
 	public Game() {

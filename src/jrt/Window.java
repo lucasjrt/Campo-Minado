@@ -19,8 +19,8 @@ public class Window {
 		this.width         = width;
 		this.height        = height;
 		this.time          = 0;
-		this.field         = new Field(width, height);
 		this.frame         = new JFrame("Campo minado");
+		this.field         = new Field(width, height, frame);
 		this.pnlMain       = new JPanel();
 		this.pnlContainer1 = new JPanel();
 		this.layout        = new GridBagLayout();
