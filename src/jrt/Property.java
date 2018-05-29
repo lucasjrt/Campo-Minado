@@ -1,0 +1,5 @@
+package jrt;
+
+public enum Property {
+	CLEAR_UNOPENED, CLEAR_OPENED, BOMB_UNOPENED, BOMB_OPENED, CLEAR_FLAG, BOMB_FLAG 
+}

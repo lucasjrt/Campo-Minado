@@ -28,6 +28,7 @@ public class Window {
 		this.pnlField      = new JPanel(layout);
 
 		buttonsAdd(field.getButtons(), pnlField);
+		field.printField();
 		pnlMain.add(pnlField);
 		frame.setResizable(false);
 		frame.setLocationRelativeTo(null);
