@@ -1,12 +1,11 @@
 package jrt;
 
 import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
@@ -16,22 +15,24 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 public class Field {
-	private BufferedImage tiles, unopenedTile, openedTile, flagTile, bombTile, clickedBombTile;
+	private BufferedImage tiles, unopenedTile, openedTile, flagTile, bombTile, clickedBombTile, wrongFlagTile;
 	private BufferedImage[] numberTiles;
-	private JFrame windowFrame;
+	private Window window;
 	private Tile buttons[][];
 	private Property field[][];
+	private Style style;
 	private int buttonSize, numBombs, width, height;
 	
-	public Field(int width, int height, JFrame windowFrame) {
-		this.windowFrame = windowFrame;
-		this.buttonSize = 28;
-		this.numBombs = (int) (width * height * .15);
+	public Field(int width, int height, Window window) {
 		this.width = width;
 		this.height = height;
-		this.field = new Property[height][width]; 
-		this.buttons = new Tile[height][width];
-		this.numberTiles = new BufferedImage[9];
+		this.window = window;
+		buttonSize = 28;
+		numBombs = (int) (width * height * .15);
+		field = new Property[height][width]; 
+		buttons = new Tile[height][width];
+		numberTiles = new BufferedImage[9];
+		style = new Style();
 		createField();
 		createBombs();
 		prepareButtons(buttons);
@@ -64,23 +65,24 @@ public class Field {
 	private void prepareButtons(Tile[][] buttons) {
 		
 		try {
-			tiles = ImageIO.read(getClass().getResource("minesweeper_tiles.jpg"));
-			clickedBombTile = ImageIO.read(getClass().getResource("clicked_bomb_tile.jpg"));
+			tiles = ImageIO.read(new File("res/minesweeper_tiles.jpg"));
+			clickedBombTile = ImageIO.read(new File("res/clicked_bomb_tile.jpg"));
+			wrongFlagTile = style.resize(ImageIO.read(new File("res/extra_tiles.jpg")).getSubimage(32, 32, 32, 32), buttonSize, buttonSize);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
-		unopenedTile = resize(tiles.getSubimage(0, 0, 128, 128), buttonSize, buttonSize);
-		flagTile = resize(tiles.getSubimage(128, 0, 128, 128), buttonSize, buttonSize);
-		bombTile = resize(tiles.getSubimage(256, 0, 128, 128), buttonSize, buttonSize);
-		openedTile = resize(tiles.getSubimage(384, 0, 128, 128), buttonSize, buttonSize);
-		clickedBombTile = resize(clickedBombTile.getSubimage(0, 0, 128, 128), buttonSize, buttonSize);
+		unopenedTile = style.resize(tiles.getSubimage(0, 0, 128, 128), buttonSize, buttonSize);
+		flagTile = style.resize(tiles.getSubimage(128, 0, 128, 128), buttonSize, buttonSize);
+		bombTile = style.resize(tiles.getSubimage(256, 0, 128, 128), buttonSize, buttonSize);
+		openedTile = style.resize(tiles.getSubimage(384, 0, 128, 128), buttonSize, buttonSize);
+		clickedBombTile = style.resize(clickedBombTile.getSubimage(0, 0, 128, 128), buttonSize, buttonSize);
 		
 		numberTiles[0] = openedTile;
-		numberTiles[1] = resize(tiles.getSubimage(0, 128, 128, 128), buttonSize, buttonSize);
+		numberTiles[1] = style.resize(tiles.getSubimage(0, 128, 128, 128), buttonSize, buttonSize);
 		
 		for(int i = 1;  i < 8; i++) {
-			numberTiles[i+1] = resize(tiles.getSubimage((128 * i) % 512, 128 + (128 * (int) (i / 4)), 128, 128), buttonSize, buttonSize);
+			numberTiles[i+1] = style.resize(tiles.getSubimage((128 * i) % 512, 128 + (128 * (int) (i / 4)), 128, 128), buttonSize, buttonSize);
 		}
 		
 		for(int i = 0; i < height; i++) {
@@ -109,13 +111,17 @@ public class Field {
 						Tile button = (Tile) e.getSource();
 						if(SwingUtilities.isRightMouseButton(e)) {
 							if(field[button.getI()][button.getJ()] == Property.CLEAR_UNOPENED || field[button.getI()][button.getJ()] == Property.BOMB_UNOPENED) {
-								button.setIconImage(flagTile);
-								if(field[button.getI()][button.getJ()] == Property.BOMB_UNOPENED)
-									field[button.getI()][button.getJ()] = Property.BOMB_FLAG;
-								else if (field[button.getI()][button.getJ()] == Property.CLEAR_UNOPENED)
-									field[button.getI()][button.getJ()] = Property.CLEAR_FLAG;
+								if(window.scorePanel.getRemainingFlags() >= 0) {
+									button.setIconImage(flagTile);
+									window.scorePanel.setRemainingFlags(window.scorePanel.getRemainingFlags() - 1);
+									if(field[button.getI()][button.getJ()] == Property.BOMB_UNOPENED)
+										field[button.getI()][button.getJ()] = Property.BOMB_FLAG;
+									else if (field[button.getI()][button.getJ()] == Property.CLEAR_UNOPENED)
+										field[button.getI()][button.getJ()] = Property.CLEAR_FLAG;
+								}
 							} else if (field[button.getI()][button.getJ()] == Property.BOMB_FLAG || field[button.getI()][button.getJ()] == Property.CLEAR_FLAG){
 								button.setIconImage(unopenedTile);
+								window.scorePanel.setRemainingFlags(window.scorePanel.getRemainingFlags() + 1);
 								if(field[button.getI()][button.getJ()] == Property.BOMB_FLAG)
 									field[button.getI()][button.getJ()] = Property.BOMB_UNOPENED;
 								else if(field[button.getI()][button.getJ()] == Property.CLEAR_FLAG)
@@ -183,15 +189,7 @@ public class Field {
 			}
 		}
 	}
-	
-	private BufferedImage resize(BufferedImage img, int height, int width) {
-        Image tmp = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        BufferedImage resized = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = resized.createGraphics();
-        g2d.drawImage(tmp, 0, 0, null);
-        g2d.dispose();
-        return resized;
-    }
+
 	
 	private int verifyAdjBombs(int i, int j) {
 		int adjBombs = 0;
@@ -325,16 +323,22 @@ public class Field {
 					field[i][j] = Property.BOMB_OPENED;
 					buttons[i][j].setIconImage(bombTile);
 				} else {
+					if(field[i][j] == Property.CLEAR_FLAG) {
+						buttons[i][j].setIconImage(wrongFlagTile);
+					}
 					field[i][j] = Property.GAME_OVER;
 				}
 			}
 		}
 		
-		GameOver gameOver = new GameOver(width, height, this.windowFrame);
+		window.scorePanel.setFace(window.scorePanel.deadFace);
+		window.scorePanel.timer.setGameOver(true);
+		
+		GameOver gameOver = new GameOver(width, height, window.frame);
 		gameOver.open();
 	}
 	
 	public JFrame getWindowFrame() {
-		return windowFrame;
+		return window.frame;
 	}
 }

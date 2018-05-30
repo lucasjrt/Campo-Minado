@@ -8,33 +8,35 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class Window {
-	private int time, bombsRemaining, width, height;
+	private int width, height;
 	Field field;
 	JFrame frame;
-	JPanel pnlMain, pnlContainer1, pnlField;
-	GridBagLayout layout;
+	JPanel pnlMain, pnlTop, pnlField;
+	ScorePanel scorePanel;
+	GridBagLayout lytField;
 	GridBagConstraints c;
 	
 	public Window(int width, int height) {
-		this.width         = width;
-		this.height        = height;
-		this.time          = 0;
-		this.frame         = new JFrame("Campo minado");
-		this.field         = new Field(width, height, frame);
-		this.pnlMain       = new JPanel();
-		this.pnlContainer1 = new JPanel();
-		this.layout        = new GridBagLayout();
-		this.c             = new GridBagConstraints();
-		this.pnlField      = new JPanel(layout);
+		this.width = width;
+		this.height = height;
+		frame = new JFrame("Campo minado");
+		field = new Field(width, height, this);
+		pnlMain = new JPanel();
+		pnlTop = new JPanel();
+		lytField = new GridBagLayout();
+		c = new GridBagConstraints();
+		pnlField = new JPanel(lytField);
+		scorePanel = new ScorePanel(field);
 
 		buttonsAdd(field.getButtons(), pnlField);
 		field.printField();
+		pnlMain.add(scorePanel);
 		pnlMain.add(pnlField);
 		frame.setResizable(false);
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.add(pnlField);
+		frame.add(pnlMain);
 		frame.pack();
 	}
 	
@@ -43,10 +45,9 @@ public class Window {
 			for(int j = 0; j < width; j++) {
 				c.gridx = j;
 				c.gridy = i;
-				layout.setConstraints(buttons[i][j], c);
+				lytField.setConstraints(buttons[i][j], c);
 				panel.add(buttons[i][j]);
 			}
 		}
 	}
-	
 }

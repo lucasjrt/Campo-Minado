@@ -28,8 +28,8 @@ public class Game {
 	}
 	
 	public Game() {
-		txtWidth    = new JTextField("10", 3);
-		txtHeight   = new JTextField("10", 3);
+		txtWidth    = new JTextField("9", 3);
+		txtHeight   = new JTextField("9", 3);
 		lblSize     = new JLabel("Defina o tamanho do campo");
 		lblWidth    = new JLabel("Largura: ");
 		lblHeight   = new JLabel("Altura: ");
