@@ -3,6 +3,7 @@ package jrt;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
+import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -15,6 +16,7 @@ public class Window {
 	ScorePanel scorePanel;
 	GridBagLayout lytField;
 	GridBagConstraints c;
+	GroupLayout lytMain;
 	
 	public Window(int width, int height) {
 		this.width = width;
@@ -24,10 +26,21 @@ public class Window {
 		pnlMain = new JPanel();
 		pnlTop = new JPanel();
 		lytField = new GridBagLayout();
+		lytMain = new GroupLayout(pnlMain);
 		c = new GridBagConstraints();
 		pnlField = new JPanel(lytField);
-		scorePanel = new ScorePanel(field);
+		scorePanel = new ScorePanel(this);
+		pnlMain.setLayout(lytMain);
 
+		lytMain.setHorizontalGroup(lytMain.createParallelGroup()
+				.addComponent(scorePanel)
+				.addComponent(pnlField));
+		
+		lytMain.setVerticalGroup(lytMain.createSequentialGroup()
+				.addComponent(scorePanel)
+				.addComponent(pnlField));
+		
+		
 		buttonsAdd(field.getButtons(), pnlField);
 		field.printField();
 		pnlMain.add(scorePanel);

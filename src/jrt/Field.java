@@ -21,14 +21,16 @@ public class Field {
 	private Tile buttons[][];
 	private Property field[][];
 	private Style style;
-	private int buttonSize, numBombs, width, height;
+	private int buttonSize, numBombs, width, height, flaggedBombs;
 	
 	public Field(int width, int height, Window window) {
 		this.width = width;
 		this.height = height;
 		this.window = window;
+		flaggedBombs = 0;
 		buttonSize = 28;
-		numBombs = (int) (width * height * .15);
+		//numBombs = (int) (width * height * .15);
+		numBombs = 1;
 		field = new Property[height][width]; 
 		buttons = new Tile[height][width];
 		numberTiles = new BufferedImage[9];
@@ -111,19 +113,25 @@ public class Field {
 						Tile button = (Tile) e.getSource();
 						if(SwingUtilities.isRightMouseButton(e)) {
 							if(field[button.getI()][button.getJ()] == Property.CLEAR_UNOPENED || field[button.getI()][button.getJ()] == Property.BOMB_UNOPENED) {
-								if(window.scorePanel.getRemainingFlags() >= 0) {
+								if(window.scorePanel.getRemainingFlags() > 0) {
 									button.setIconImage(flagTile);
 									window.scorePanel.setRemainingFlags(window.scorePanel.getRemainingFlags() - 1);
-									if(field[button.getI()][button.getJ()] == Property.BOMB_UNOPENED)
+									if(field[button.getI()][button.getJ()] == Property.BOMB_UNOPENED) {
 										field[button.getI()][button.getJ()] = Property.BOMB_FLAG;
+										flaggedBombs++;
+										if(flaggedBombs == numBombs)
+											victory();
+									}
 									else if (field[button.getI()][button.getJ()] == Property.CLEAR_UNOPENED)
 										field[button.getI()][button.getJ()] = Property.CLEAR_FLAG;
-								}
+								} 
 							} else if (field[button.getI()][button.getJ()] == Property.BOMB_FLAG || field[button.getI()][button.getJ()] == Property.CLEAR_FLAG){
 								button.setIconImage(unopenedTile);
 								window.scorePanel.setRemainingFlags(window.scorePanel.getRemainingFlags() + 1);
-								if(field[button.getI()][button.getJ()] == Property.BOMB_FLAG)
+								if(field[button.getI()][button.getJ()] == Property.BOMB_FLAG) {
 									field[button.getI()][button.getJ()] = Property.BOMB_UNOPENED;
+									flaggedBombs--;
+								}
 								else if(field[button.getI()][button.getJ()] == Property.CLEAR_FLAG)
 									field[button.getI()][button.getJ()] = Property.CLEAR_UNOPENED;
 							}
@@ -132,8 +140,6 @@ public class Field {
 								if(verifyAdjBombs(button.getI(), button.getJ()) > 0)
 									button.setIconImage(numberTiles[verifyAdjBombs(button.getI(), button.getJ())]);
 								else {
-									button.setIconImage(numberTiles[0]);
-									field[button.getI()][button.getJ()] = Property.CLEAR_OPENED;
 									recursion(button.getI(), button.getJ());
 								}
 								field[button.getI()][button.getJ()] = Property.CLEAR_OPENED;
@@ -171,6 +177,14 @@ public class Field {
 	
 	public int getButtonSize() {
 		return buttonSize;
+	}
+	
+	public int getFieldWidth() {
+		return width;
+	}
+	
+	public int getFieldHeight() {
+		return height;
 	}
 	
 	public void printField() {
@@ -225,6 +239,10 @@ public class Field {
 	}
 	
 	private void recursion(int i, int j) {
+		if(field[i][j] != Property.CLEAR_OPENED) {
+			buttons[i][j].setIconImage(numberTiles[0]);
+			field[i][j] = Property.CLEAR_OPENED;
+		}
 		if(i - 1 >= 0) {
 			if(field[i-1][j] == Property.CLEAR_UNOPENED) {
 				field[i-1][j] = Property.CLEAR_OPENED;
@@ -316,6 +334,107 @@ public class Field {
 		}
 	}
 	
+	private void slowRecursion(int i, int j) {
+		try {
+			Thread.sleep(30);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		if(field[i][j] != Property.CLEAR_OPENED) {
+			buttons[i][j].setIconImage(numberTiles[verifyAdjBombs(i,j)]);
+			field[i][j] = Property.CLEAR_OPENED;
+		}
+		if(i - 1 >= 0) {
+			if(field[i-1][j] == Property.CLEAR_UNOPENED) {
+				field[i-1][j] = Property.CLEAR_OPENED;
+				if(verifyAdjBombs(i-1, j) > 0)
+					buttons[i-1][j].setIconImage(numberTiles[verifyAdjBombs(i-1, j)]);
+				else {
+					buttons[i-1][j].setIconImage(numberTiles[0]);
+					slowRecursion(i-1, j);
+				}
+			}
+			if(j - 1 >= 0) {
+				if(field[i-1][j-1] == Property.CLEAR_UNOPENED) {
+					field[i-1][j-1] = Property.CLEAR_OPENED;
+					if(verifyAdjBombs(i-1, j-1) > 0)
+						buttons[i-1][j-1].setIconImage(numberTiles[verifyAdjBombs(i-1, j-1)]);
+					else {
+						buttons[i-1][j-1].setIconImage(numberTiles[0]);
+						slowRecursion(i-1, j-1);
+					}
+				}
+			}
+			if(j + 1 < width) {
+				if(field[i-1][j+1] == Property.CLEAR_UNOPENED) {
+					field[i-1][j+1] = Property.CLEAR_OPENED;
+					if(verifyAdjBombs(i-1, j+1) > 0)
+						buttons[i-1][j+1].setIconImage(numberTiles[verifyAdjBombs(i-1, j+1)]);
+					else {
+						buttons[i-1][j+1].setIconImage(numberTiles[0]);
+						slowRecursion(i-1, j+1);
+					}
+				}
+			}
+				
+		}
+		if(i + 1 < height) {
+			if(field[i+1][j] == Property.CLEAR_UNOPENED) {
+				field[i+1][j] = Property.CLEAR_OPENED;
+				if(verifyAdjBombs(i+1, j) > 0)
+					buttons[i+1][j].setIconImage(numberTiles[verifyAdjBombs(i+1, j)]);
+				else {
+					buttons[i+1][j].setIconImage(numberTiles[0]);
+					slowRecursion(i+1, j);
+				}
+			}
+			if(j - 1 >= 0) {
+				if(field[i+1][j-1] == Property.CLEAR_UNOPENED) {
+					field[i+1][j-1] = Property.CLEAR_OPENED;
+					if(verifyAdjBombs(i+1, j-1) > 0)
+						buttons[i+1][j-1].setIconImage(numberTiles[verifyAdjBombs(i+1, j-1)]);
+					else {
+						buttons[i+1][j-1].setIconImage(numberTiles[0]);
+						slowRecursion(i+1, j-1);
+					}
+				}
+			}
+			if(j + 1 < width) {
+				if(field[i+1][j+1] == Property.CLEAR_UNOPENED) {
+					field[i+1][j+1] = Property.CLEAR_OPENED;
+					if(verifyAdjBombs(i+1, j+1) > 0)
+						buttons[i+1][j+1].setIconImage(numberTiles[verifyAdjBombs(i+1, j+1)]);
+					else {
+						buttons[i+1][j+1].setIconImage(numberTiles[0]);
+						slowRecursion(i+1, j+1);
+					}
+				}
+			}
+		}
+		if(j - 1 >= 0) {
+			if(field[i][j-1] == Property.CLEAR_UNOPENED) {
+				field[i][j-1] = Property.CLEAR_OPENED;
+				if(verifyAdjBombs(i, j-1) > 0)
+					buttons[i][j-1].setIconImage(numberTiles[verifyAdjBombs(i, j-1)]);
+				else {
+					buttons[i][j-1].setIconImage(numberTiles[0]);
+					slowRecursion(i, j-1);
+				}
+			}
+		}
+		if(j + 1 < width) {
+			if(field[i][j+1] == Property.CLEAR_UNOPENED) {
+				field[i][j+1] = Property.CLEAR_OPENED;
+				if(verifyAdjBombs(i, j+1) > 0)
+					buttons[i][j+1].setIconImage(numberTiles[verifyAdjBombs(i, j+1)]);
+				else {
+					buttons[i][j+1].setIconImage(numberTiles[0]);
+					slowRecursion(i, j+1);
+				}
+			}
+		}
+	}
+	
 	private void gameOver() {
 		for(int i = 0; i < height; i++) {
 			for(int j = 0; j < width; j++) {
@@ -338,7 +457,48 @@ public class Field {
 		gameOver.open();
 	}
 	
+	private void victory() {
+		window.scorePanel.timer.setGameOver(true);
+		slowOpenField();
+		window.scorePanel.setFace(window.scorePanel.glassFace);
+	}
+	
+	private void slowOpenField() {
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				for(int i = 0; i < height; i++) {
+					for(int j = 0; j < width; j++) {
+						if(field[i][j] != Property.BOMB_FLAG && field[i][j] != Property.CLEAR_OPENED) {
+							slowRecursion(i, j);
+							field[i][j] = Property.GAME_OVER;
+						}
+					}
+				}
+			}
+		});
+		t.start();
+	}
+	
 	public JFrame getWindowFrame() {
 		return window.frame;
+	}
+	
+	public void resetGame() {
+		window.scorePanel.timer.setGameOver(false);
+		for(int i = 0; i < height; i++) {
+			for(int j = 0; j < width; j++) {
+				field[i][j] = Property.CLEAR_UNOPENED;
+				buttons[i][j].setIconImage(unopenedTile);
+			}
+		}
+		
+		createBombs();
+		printField();
+		flaggedBombs = 0;
+		
+		window.scorePanel.setFace(window.scorePanel.happyFace);
+		window.scorePanel.resetBombsDisplay();
+		window.scorePanel.resetTimer();
 	}
 }

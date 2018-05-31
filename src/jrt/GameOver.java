@@ -116,4 +116,12 @@ public class GameOver {
 		layout.setConstraints(btnExit, c);
 		panel.add(btnExit, c);
 	}
+	
+	public void setLblYouLose(String text) {
+		lblYouLose.setText(text);
+	}
+	
+	public void setFrameTitle(String title) {
+		frame.setTitle(title);
+	}
 }
