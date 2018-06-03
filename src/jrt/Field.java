@@ -22,6 +22,7 @@ public class Field {
 	private Property field[][];
 	private Style style;
 	private int buttonSize, numBombs, width, height, flaggedBombs;
+	private boolean gameStarted;
 	
 	public Field(int width, int height, Window window) {
 		this.width = width;
@@ -29,8 +30,8 @@ public class Field {
 		this.window = window;
 		flaggedBombs = 0;
 		buttonSize = 28;
-		//numBombs = (int) (width * height * .15);
-		numBombs = 1;
+		gameStarted = false;
+		numBombs = (int) (width * height * .15);
 		field = new Property[height][width]; 
 		buttons = new Tile[height][width];
 		numberTiles = new BufferedImage[9];
@@ -111,6 +112,10 @@ public class Field {
 					@Override
 					public void mouseClicked(MouseEvent e) {
 						Tile button = (Tile) e.getSource();
+						if(!gameStarted && field[button.getI()][button.getJ()] != Property.BOMB_UNOPENED) {
+							gameStarted = true;
+							window.scorePanel.timer.begin();
+						}
 						if(SwingUtilities.isRightMouseButton(e)) {
 							if(field[button.getI()][button.getJ()] == Property.CLEAR_UNOPENED || field[button.getI()][button.getJ()] == Property.BOMB_UNOPENED) {
 								if(window.scorePanel.getRemainingFlags() > 0) {
@@ -451,14 +456,11 @@ public class Field {
 		}
 		
 		window.scorePanel.setFace(window.scorePanel.deadFace);
-		window.scorePanel.timer.setGameOver(true);
-		
-		GameOver gameOver = new GameOver(width, height, window.frame);
-		gameOver.open();
+		window.scorePanel.timer.stopCounting();
 	}
 	
 	private void victory() {
-		window.scorePanel.timer.setGameOver(true);
+		window.scorePanel.timer.stopCounting();
 		slowOpenField();
 		window.scorePanel.setFace(window.scorePanel.glassFace);
 	}
@@ -485,7 +487,7 @@ public class Field {
 	}
 	
 	public void resetGame() {
-		window.scorePanel.timer.setGameOver(false);
+		window.scorePanel.timer.stopCounting();
 		for(int i = 0; i < height; i++) {
 			for(int j = 0; j < width; j++) {
 				field[i][j] = Property.CLEAR_UNOPENED;
@@ -496,6 +498,7 @@ public class Field {
 		createBombs();
 		printField();
 		flaggedBombs = 0;
+		gameStarted = false;
 		
 		window.scorePanel.setFace(window.scorePanel.happyFace);
 		window.scorePanel.resetBombsDisplay();

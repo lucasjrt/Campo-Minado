@@ -1,38 +1,38 @@
 package jrt;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
-import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 public class ScorePanel extends JPanel {
 	//TODO    v    remove static from here
 	private static final long serialVersionUID = 1L;
-	int displayWidth, displayHeight, faceSize, remainingFlags, time;
-	double scale;
-	BorderLayout layout;
-	BufferedImage displayImage, faces;
-	BufferedImage display[];
-	Window window;
-	Timer timer;
-	public ImageIcon happyFace, glassFace, deadFace;
-	JLabel lblHundredsTime, lblTensTime, lblOnesTime, lblHundredsBombs, lblTensBombs, lblOnesBombs;
-	JButton btnFace;
-	JPanel pnlTime, pnlBombs, pnlFace;
-	Style style;
+	private int displayWidth, displayHeight, faceSize, remainingFlags, time;
+	private double scale;
+	private BorderLayout layout;
+	private BufferedImage displayImage, faces, clickedFaces;
+	private BufferedImage display[];
+	private Window window;
+	private JButton btnFace;
+	private JPanel pnlTime, pnlBombs, pnlFace;
+	private Style style;
+	public Timer timer;
+	public ImageIcon happyFace, glassFace, deadFace, wowFace;
+	public ImageIcon clickedHappyFace, clickedDeadFace, clickedGlassFace;
+	public JLabel lblHundredsTime, lblTensTime, lblOnesTime, lblHundredsBombs, lblTensBombs, lblOnesBombs;
 	
 	public ScorePanel(Window window) {
 		this.window = window;
@@ -60,6 +60,7 @@ public class ScorePanel extends JPanel {
 		try {
 			displayImage = ImageIO.read(new File("res/seven_segment_display.jpg"));
 			faces = ImageIO.read(new File("res/extra_tiles.jpg"));
+			clickedFaces = ImageIO.read(new File("res/clicked_bomb_tiles.jpg"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -74,14 +75,35 @@ public class ScorePanel extends JPanel {
 		
 		prepareFace();
 		
-		btnFace.addActionListener(new ActionListener() {
+		btnFace.addMouseListener(new MouseListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				if(!timer.isGameOver()) {
-					confirmDialog();
-				} else {
+			public void mouseReleased(MouseEvent e) {
+				if(isMouseIn(e, btnFace)) {
 					window.field.resetGame();
 				}
+			}
+			
+			@Override
+			public void mousePressed(MouseEvent e) {
+				
+			}
+			
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
 			}
 		});
 		
@@ -105,22 +127,23 @@ public class ScorePanel extends JPanel {
 		pnlTime.add(lblTensTime);
 		pnlTime.add(lblOnesTime);
 		
-		updateTimer();
-		
 		this.add(pnlBombs, BorderLayout.WEST);
 		this.add(pnlFace, BorderLayout.CENTER);
 		this.add(pnlTime, BorderLayout.EAST);
 	}
 	
+	protected boolean isMouseIn(MouseEvent e, Component component) {
+		if(e.getX() >= component.getX() && e.getX() <= component.getWidth() && e.getY() >= component.getY() && e.getY() <= component.getWidth())
+			return true;
+		return false;
+	}
+
 	public void setDisplayLabel(JLabel label, int index) {
 		label.setIcon(new ImageIcon(display[index]));
 	}
 	
 	public void increaseTimer() {
-		time++;
-		setDisplayLabel(lblHundredsTime, (int) (time / 100));
-		setDisplayLabel(lblTensTime, (int) (time % 100) / 10);
-		setDisplayLabel(lblOnesTime, (int) (time % 10));
+		
 	}
 	
 	public int getTime() {
@@ -145,18 +168,13 @@ public class ScorePanel extends JPanel {
 		setDisplayLabel(lblOnesBombs, (int) (remainingFlags % 10));
 	}
 	
-	private void updateTimer() {
-		timer.begin();
-	}
-	
 	public void resetTimer() {
 		time = 0;
 		timer = new Timer(this);
-		timer.setGameOver(false);
+		timer.stopCounting();
 		setDisplayLabel(lblHundredsBombs, 0);
 		setDisplayLabel(lblTensTime, 0);
 		setDisplayLabel(lblOnesTime, 0);
-		updateTimer();
 	}
 	
 	public void resetBombsDisplay() { 
@@ -176,62 +194,6 @@ public class ScorePanel extends JPanel {
 		btnFace.setIcon(happyFace);
 	}
 	
-	private void confirmDialog() {
-		JFrame frame = new JFrame("Aviso");
-		JLabel lblWarning = new JLabel("Você tem certeza que deseja iniciar um novo jogo?");
-		JPanel panel = new JPanel();
-		JButton btnConfirm, btnCancel;
-		btnConfirm = new JButton("Confirmar");
-		btnCancel = new JButton("Cancelar");
-		GroupLayout layout = new GroupLayout(panel);
-		panel.setLayout(layout);
-		
-		layout.setAutoCreateContainerGaps(true);
-		layout.setAutoCreateGaps(true);
-		
-		layout.setHorizontalGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
-				.addComponent(lblWarning)
-				.addGroup(layout.createSequentialGroup()
-						.addComponent(btnCancel)
-						.addComponent(btnConfirm)));
-		
-		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addComponent(lblWarning)
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
-						.addComponent(btnCancel)
-						.addComponent(btnConfirm)));
-		
-		style.prepareButton(btnCancel);
-		style.prepareButton(btnConfirm);
-		style.prepareLabel(lblWarning);
-		style.preparePanel(panel);
-		
-		frame.setVisible(true);
-		frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-		frame.setLocationRelativeTo(null);
-		panel.add(lblWarning);
-		panel.add(btnCancel);
-		panel.add(btnConfirm);
-		frame.add(panel);
-		frame.pack();
-		
-		btnConfirm.addActionListener(new ActionListener() {	
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				frame.setVisible(false);
-				window.scorePanel.timer.setGameOver(true);
-				window.field.resetGame();
-			}
-		});
-		
-		btnCancel.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				frame.setVisible(false);
-			}
-		});
-	}
-	
 	public void setTimerDisplayValue(int i) {
 		setDisplayLabel(lblHundredsTime, (int) (i / 100));
 		setDisplayLabel(lblTensTime, (int) (i % 100) / 10);
@@ -244,11 +206,14 @@ public class ScorePanel extends JPanel {
 }
 
 class Timer extends Thread implements Runnable{
-	boolean gameOver;
+	private boolean timerRunning;
 	ScorePanel panel;
+	int time;
 	
 	public Timer(ScorePanel panel) {
 		this.panel = panel;
+		timerRunning = false;
+		time = 0;
 	}
 	
 	@Override
@@ -258,28 +223,29 @@ class Timer extends Thread implements Runnable{
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		
 		long startTime = System.currentTimeMillis();
 		long last = startTime;
-		while(!gameOver) {
+		while(timerRunning) {
 			long delta = System.currentTimeMillis() - startTime;
 			long seconds = delta / 1000;
 			long secondsDisplay = seconds % 60;
 			if(delta % 1000 == 0 && secondsDisplay != last) {
 				last = secondsDisplay;
-				panel.increaseTimer();
+				time++;
+				panel.setDisplayLabel(panel.lblHundredsTime, (int) (time / 100));
+				panel.setDisplayLabel(panel.lblTensTime, (int) (time % 100) / 10);
+				panel.setDisplayLabel(panel.lblOnesTime, (int) (time % 10));
 			}
 		}
 	}
 	
 	public void begin() {
+		timerRunning = true;
 		this.start();
 	}
 	
-	public void setGameOver(boolean isGameOver) {
-		gameOver = isGameOver;
-	}
-	
-	public boolean isGameOver() {
-		return gameOver;
+	public void stopCounting() {
+		timerRunning = false;
 	}
 }

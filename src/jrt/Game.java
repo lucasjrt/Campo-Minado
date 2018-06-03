@@ -24,7 +24,7 @@ public class Game {
 	Style style;
 	Window window;
 	public static void main(String[] args) {
-		new Game();
+		new Window(9, 9);
 	}
 	
 	public Game() {
