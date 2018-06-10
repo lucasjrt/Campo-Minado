@@ -188,9 +188,10 @@ public class ScorePanel extends JPanel {
 	}
 	
 	public void resetTimer() {
+		if(timer.isAlive())
+			timer.stopCounting();
 		time = 0;
 		timer = new Timer(this);
-		timer.stopCounting();
 		setDisplayLabel(lblHundredsBombs, 0);
 		setDisplayLabel(lblTensTime, 0);
 		setDisplayLabel(lblOnesTime, 0);
