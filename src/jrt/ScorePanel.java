@@ -17,9 +17,8 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+@SuppressWarnings("serial")
 public class ScorePanel extends JPanel {
-	//TODO    v    remove static from here
-	private static final long serialVersionUID = 1L;
 	private int displayWidth, displayHeight, faceSize, remainingFlags, time;
 	private double scale;
 	private BorderLayout layout;
@@ -60,7 +59,7 @@ public class ScorePanel extends JPanel {
 		try {
 			displayImage = ImageIO.read(new File("res/seven_segment_display.jpg"));
 			faces = ImageIO.read(new File("res/extra_tiles.jpg"));
-			clickedFaces = ImageIO.read(new File("res/clicked_bomb_tiles.jpg"));
+			clickedFaces = ImageIO.read(new File("res/clicked_tiles.jpg"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -72,12 +71,24 @@ public class ScorePanel extends JPanel {
 		happyFace = new ImageIcon(style.resize(faces.getSubimage(0, 0, 32, 32), faceSize, faceSize));
 		glassFace = new ImageIcon(style.resize(faces.getSubimage(32, 0, 32, 32), faceSize, faceSize));
 		deadFace = new ImageIcon(style.resize(faces.getSubimage(0, 32, 32, 32), faceSize, faceSize));
-		
+		clickedHappyFace = new ImageIcon(style.resize(clickedFaces.getSubimage(32, 0, 32, 32), faceSize, faceSize));
+		clickedDeadFace = new ImageIcon(style.resize(clickedFaces.getSubimage(0, 32, 32, 32), faceSize, faceSize));
+		clickedGlassFace = new ImageIcon(style.resize(clickedFaces.getSubimage(32, 32, 32, 32), faceSize, faceSize));
 		prepareFace();
 		
 		btnFace.addMouseListener(new MouseListener() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
+				if(btnFace.getIcon() == clickedHappyFace)
+					btnFace.setIcon(happyFace);
+				else if(btnFace.getIcon() == clickedDeadFace)
+					btnFace.setIcon(deadFace);
+				else if(btnFace.getIcon() == clickedGlassFace) {
+					if(isMouseIn(e,btnFace))
+						btnFace.setIcon(happyFace);
+					else
+						btnFace.setIcon(glassFace);
+				}
 				if(isMouseIn(e, btnFace)) {
 					window.field.resetGame();
 				}
@@ -85,7 +96,12 @@ public class ScorePanel extends JPanel {
 			
 			@Override
 			public void mousePressed(MouseEvent e) {
-				
+				if(btnFace.getIcon() == happyFace)
+					btnFace.setIcon(clickedHappyFace);
+				else if(btnFace.getIcon() == deadFace)
+					btnFace.setIcon(clickedDeadFace);
+				else if(btnFace.getIcon() == glassFace)
+					btnFace.setIcon(clickedGlassFace);
 			}
 			
 			@Override
@@ -133,7 +149,10 @@ public class ScorePanel extends JPanel {
 	}
 	
 	protected boolean isMouseIn(MouseEvent e, Component component) {
-		if(e.getX() >= component.getX() && e.getX() <= component.getWidth() && e.getY() >= component.getY() && e.getY() <= component.getWidth())
+		if(e.getXOnScreen() >= component.getLocationOnScreen().getX() &&
+				e.getXOnScreen() <= component.getLocationOnScreen().getX() + component.getWidth() &&
+				e.getYOnScreen() >= component.getLocationOnScreen().getY() &&
+				e.getYOnScreen() <= component.getLocationOnScreen().getY() + component.getWidth())
 			return true;
 		return false;
 	}
@@ -245,7 +264,9 @@ class Timer extends Thread implements Runnable{
 		this.start();
 	}
 	
+	@SuppressWarnings("deprecation")
 	public void stopCounting() {
+		this.stop();
 		timerRunning = false;
 	}
 }
