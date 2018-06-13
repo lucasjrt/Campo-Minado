@@ -27,6 +27,8 @@ public class ScorePanel extends JPanel {
 	private Window window;
 	private JButton btnFace;
 	private JPanel pnlTime, pnlBombs, pnlFace;
+	
+	
 	private Style style;
 	public Timer timer;
 	public ImageIcon happyFace, glassFace, deadFace, wowFace;
@@ -77,8 +79,10 @@ public class ScorePanel extends JPanel {
 		prepareFace();
 		
 		btnFace.addMouseListener(new MouseListener() {
+			private boolean isPressed = false;
 			@Override
 			public void mouseReleased(MouseEvent e) {
+				isPressed = false;
 				if(btnFace.getIcon() == clickedHappyFace)
 					btnFace.setIcon(happyFace);
 				else if(btnFace.getIcon() == clickedDeadFace)
@@ -96,6 +100,7 @@ public class ScorePanel extends JPanel {
 			
 			@Override
 			public void mousePressed(MouseEvent e) {
+				isPressed = true;
 				if(btnFace.getIcon() == happyFace)
 					btnFace.setIcon(clickedHappyFace);
 				else if(btnFace.getIcon() == deadFace)
@@ -106,14 +111,27 @@ public class ScorePanel extends JPanel {
 			
 			@Override
 			public void mouseExited(MouseEvent e) {
-				// TODO Auto-generated method stub
+				if(isPressed) {
+					if(btnFace.getIcon() == clickedHappyFace) 
+						btnFace.setIcon(happyFace);
+					else if(btnFace.getIcon() == clickedDeadFace)
+						btnFace.setIcon(deadFace);
+					else if(btnFace.getIcon() == clickedGlassFace)
+						btnFace.setIcon(glassFace);
+				}
 				
 			}
 			
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
+				if(isPressed) {
+					if(btnFace.getIcon() == happyFace)
+						btnFace.setIcon(clickedHappyFace);
+					else if(btnFace.getIcon() == deadFace)
+						btnFace.setIcon(clickedDeadFace);
+					else if(btnFace.getIcon() == glassFace)
+						btnFace.setIcon(clickedGlassFace);
+				}
 			}
 			
 			@Override

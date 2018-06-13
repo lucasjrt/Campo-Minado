@@ -15,7 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 public class Field {
-	private BufferedImage tiles, unopenedTile, openedTile, flagTile, bombTile, clickedBombTile, wrongFlagTile;
+	public BufferedImage tiles, unopenedTile, openedTile, flagTile, bombTile, clickedBombTile, wrongFlagTile, questionTile;
 	private BufferedImage[] numberTiles;
 	private Window window;
 	private Tile buttons[][];
@@ -32,7 +32,8 @@ public class Field {
 		buttonSize = 28;
 		gameStarted = false;
 		numBombs = (int) (width * height * .15);
-		field = new Property[height][width]; 
+		//numBombs = 1;
+		field = new Property[height][width];
 		buttons = new Tile[height][width];
 		numberTiles = new BufferedImage[9];
 		style = new Style();
@@ -65,12 +66,12 @@ public class Field {
 		System.out.println(numBombs + " bombs created");
 	}
 	
-	private void prepareButtons(Tile[][] buttons) {
-		
+	private void loadImages() {
 		try {
 			tiles = ImageIO.read(new File("res/minesweeper_tiles.jpg"));
 			clickedBombTile = ImageIO.read(new File("res/clicked_bomb_tile.jpg"));
 			wrongFlagTile = style.resize(ImageIO.read(new File("res/extra_tiles.jpg")).getSubimage(32, 32, 32, 32), buttonSize, buttonSize);
+			questionTile = style.resize(ImageIO.read(new File("res/question_mark.jpg")), buttonSize, buttonSize);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -87,6 +88,10 @@ public class Field {
 		for(int i = 1;  i < 8; i++) {
 			numberTiles[i+1] = style.resize(tiles.getSubimage((128 * i) % 512, 128 + (128 * (int) (i / 4)), 128, 128), buttonSize, buttonSize);
 		}
+	}
+	
+	private void prepareButtons(Tile[][] buttons) {
+		loadImages();
 		
 		for(int i = 0; i < height; i++) {
 			for(int j = 0; j < width; j++) {
@@ -161,6 +166,7 @@ public class Field {
 	}
 	
 	public void addToPanel(JPanel panel) {
+		Timer timer;
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
 				panel.add(buttons[i][j]);
@@ -209,7 +215,6 @@ public class Field {
 		}
 	}
 
-	
 	private int verifyAdjBombs(int i, int j) {
 		int adjBombs = 0;
 		if(i - 1 >= 0) {
@@ -341,7 +346,7 @@ public class Field {
 	
 	private void slowRecursion(int i, int j) {
 		try {
-			Thread.sleep(30);
+			Thread.sleep(5);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

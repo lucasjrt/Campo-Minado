@@ -5,9 +5,8 @@ import java.awt.image.BufferedImage;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 
+@SuppressWarnings("serial")
 public class Tile extends JButton{
-	//TODO    v    remove static from here
-	private static final long serialVersionUID = 1L;
 	private int i, j;
 	private ImageIcon icon;
 	private BufferedImage bufferedIcon;
