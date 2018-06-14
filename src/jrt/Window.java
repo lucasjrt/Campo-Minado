@@ -13,6 +13,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 
@@ -28,11 +29,11 @@ public class Window {
 	GridBagConstraints c;
 	GroupLayout lytMain;
 	
-	public Window(int width, int height) {
+	public Window(int width, int height, int bombs, int difficulty) {
 		this.width = width;
 		this.height = height;
 		frame = new JFrame("Campo minado");
-		field = new Field(width, height, this);
+		field = new Field(width, height, this, bombs);
 		pnlMain = new JPanel();
 		pnlTop = new JPanel();
 		lytField = new GridBagLayout();
@@ -54,7 +55,7 @@ public class Window {
 				.addComponent(pnlField));
 		
 		
-		prepareMenu();
+		prepareMenu(difficulty);
 		buttonsAdd(field.getButtons(), pnlField);
 		field.printField();
 		pnlMain.add(scorePanel);
@@ -79,7 +80,7 @@ public class Window {
 		}
 	}
 	
-	private void prepareMenu() {
+	private void prepareMenu(int difficulty) {
 		frame.setJMenuBar(menuBar);
 		JMenu gameMenu = new JMenu("Jogo");
 		JMenu helpMenu = new JMenu("Ajuda");
@@ -98,8 +99,23 @@ public class Window {
 		buttonGroup.add(medium);
 		buttonGroup.add(hard);
 		buttonGroup.add(custom);
-		easy.setSelected(true);
 		questionMark.setSelected(true);
+		
+		switch(difficulty) {
+		case 1:
+			easy.setSelected(true);
+			break;
+		case 2:
+			medium.setSelected(true);
+			break;
+		case 3:
+			hard.setSelected(true);
+			break;
+		case 4:
+			custom.setSelected(true);
+			break;
+		}
+		
 		
 		gameMenu.add(newGame);
 		gameMenu.addSeparator();
@@ -125,6 +141,58 @@ public class Window {
 			}
 		});
 		
+		easy.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					this.finalize();
+					frame.setVisible(false);
+					new Window(9,9,10, 1);
+				} catch (Throwable ex) {
+					ex.printStackTrace();
+				}
+			}
+		});
+		
+		medium.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					this.finalize();
+					frame.setVisible(false);
+					new Window(16, 16, 40, 2);
+				} catch (Throwable ex) {
+					ex.printStackTrace();
+				}
+			}
+		});
+		
+		hard.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					this.finalize();
+					frame.setVisible(false);
+					new Window(30, 16, 99, 3);
+				} catch (Throwable ex) {
+					ex.printStackTrace();
+				}
+			}
+		});
+		
+		custom.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					this.finalize();
+					frame.setVisible(false);
+					new Game();
+				} catch (Throwable ex) {
+					ex.printStackTrace();
+				}
+			}
+		});
+		
 		questionMark.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -141,6 +209,19 @@ public class Window {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				System.exit(0);
+			}
+		});
+		
+		about.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(frame, 
+						"Desenvolvedores por: \n"
+						+ "             *Lucas Justino\n"
+						+ "             *Tarcisio Junio\n"
+						+ "Alunos de Ciência da computação na\n"
+						+ "Universidade Federal de Uberlândia - UFU\n",
+						"Sobre", JOptionPane.PLAIN_MESSAGE);
 			}
 		});
 	}

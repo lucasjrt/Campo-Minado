@@ -24,14 +24,15 @@ public class Field {
 	private int buttonSize, numBombs, width, height, flaggedBombs;
 	private boolean gameStarted;
 	
-	public Field(int width, int height, Window window) {
+	public Field(int width, int height, Window window, int numBombs) {
 		this.width = width;
 		this.height = height;
 		this.window = window;
 		flaggedBombs = 0;
 		buttonSize = 28;
 		gameStarted = false;
-		numBombs = (int) (width * height * .15);
+		this.numBombs = numBombs;
+		//numBombs = (int) (width * height * .15);
 		//numBombs = 1;
 		field = new Property[height][width];
 		buttons = new Tile[height][width];
@@ -166,7 +167,6 @@ public class Field {
 	}
 	
 	public void addToPanel(JPanel panel) {
-		Timer timer;
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
 				panel.add(buttons[i][j]);
@@ -180,6 +180,10 @@ public class Field {
 	
 	public Property[][] getField() {
 		return field;
+	}
+	
+	public void setNumBombs(int numBombs) {
+		this.numBombs = numBombs;
 	}
 	
 	public int getNumBombs() {

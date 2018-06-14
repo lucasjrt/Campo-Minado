@@ -18,7 +18,7 @@ public class Style {
 		pnlBackground = new Color(65, 105, 225);
 		btnBackground = new Color(255, 165, 0);
 		txtBackground = new Color(135, 206, 250);
-		txtSelection = Color.BLUE;
+		txtSelection = new Color(100, 150, 255);
 		txtSelected = Color.WHITE;
 		lblForeground = Color.WHITE;
 	}
