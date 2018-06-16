@@ -4,6 +4,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -16,17 +19,17 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 public class Game {
-	EmptyBorder border;
-	JFrame frame;
-	JPanel panel;
-	JLabel lblSize, lblWidth, lblHeight, lblBombs;
-	JTextField txtWidth, txtHeight, txtBombs;
-	JButton btnContinue, btnExit;
-	GroupLayout layout;
-	Style style;
-	Window window;
+	private EmptyBorder border;
+	private JFrame frame;
+	private JPanel panel;
+	private JLabel lblSize, lblWidth, lblHeight, lblBombs;
+	private JTextField txtWidth, txtHeight, txtBombs;
+	private JButton btnContinue, btnExit;
+	private GroupLayout layout;
+	private Style style;
+	
 	public static void main(String[] args) {
-		new Window(9, 9, 10, 1);
+		new Window(9, 9, 10, 1, true);
 //		new Game();
 	}
 	
@@ -52,7 +55,6 @@ public class Game {
 		layout.setAutoCreateContainerGaps(true);
 		
 		frame.setVisible(true);
-		frame.setLocationRelativeTo(null);
 		
 		layout.setHorizontalGroup(layout.createParallelGroup()
 				.addComponent(lblSize)
@@ -96,8 +98,24 @@ public class Game {
 		style.prepareLabel(lblWidth);
 		style.prepareLabel(lblBombs);
 		
+		panel.addKeyListener(new KeyListener() {
+			@Override
+			public void keyTyped(KeyEvent arg0) {
+				if(arg0.getKeyCode() == KeyEvent.VK_ENTER) {
+					System.out.println("enter pressionado");
+				} else {
+					System.out.println("Enter não pressionado");
+				}
+			}
+			@Override
+			public void keyReleased(KeyEvent arg0) {}
+			@Override
+			public void keyPressed(KeyEvent arg0) {}
+		});
+		
 		frame.add(panel);
 		frame.pack();
+		frame.setLocationRelativeTo(null);
 		frame.setResizable(false);
 		
 		txtWidth.addFocusListener(new FocusListener() {
@@ -127,6 +145,30 @@ public class Game {
 			}
 		});
 		
+		txtWidth.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+					btnContinue.doClick();
+				}
+			}	
+		});
+		
+		txtHeight.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+					btnContinue.doClick();
+				}
+			}
+		});
+		
+		txtBombs.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+					btnContinue.doClick();
+				}
+			}
+		});
+		
 		btnExit.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -142,24 +184,25 @@ public class Game {
 					w = Integer.parseInt(txtWidth.getText());
 					h = Integer.parseInt(txtHeight.getText());
 					b = Integer.parseInt(txtBombs.getText());
-					if(w >= 5 && h >= 5 && w <= 50 && h <= 30 && b > 0 && b < w * h) {
+					if(w >= 7 && h >= 7 && w <= 50 && h <= 30 && b > 0 && b < w * h) {
 						frame.setVisible(false);
-						window = new Window(Integer.parseInt(txtWidth.getText()), Integer.parseInt(txtHeight.getText()), Integer.parseInt(txtBombs.getText()), 4);
+						new Window(Integer.parseInt(txtWidth.getText()), Integer.parseInt(txtHeight.getText()), Integer.parseInt(txtBombs.getText()), 4, true);
 					}
-					else if(w < 5 || w > 50)
+					else if(w < 7 || w > 50)
 						JOptionPane.showMessageDialog(frame, "A largura deve estar entre 5 e 50", "ERRO", JOptionPane.ERROR_MESSAGE);
-					else if(h < 5 || h > 30)
+					else if(h < 7 || h > 30)
 						JOptionPane.showMessageDialog(frame, "A altura deve estar entre 5 e 30", "ERRO", JOptionPane.ERROR_MESSAGE);
 					else if(b < 1 || b > w * h - 1)
-						JOptionPane.showMessageDialog(null, "O númeor de bombas deve estar entre 1 e " + (w * h - 1), "ERRO", JOptionPane.ERROR_MESSAGE);
-					else
-						JOptionPane.showMessageDialog(frame, "Erro inesperado", "ERRO", JOptionPane.ERROR_MESSAGE);
-					}	
-			}
+						JOptionPane.showMessageDialog(null, "O númeor de bombas deve estar entre 1 e " + (w * h - 1), "ERRO", JOptionPane.ERROR_MESSAGE);	
+				}
+				else
+					JOptionPane.showMessageDialog(frame, "Os campos devem ser preenchidos somente com números inteiros", "ERRO", JOptionPane.ERROR_MESSAGE);
+				}
 		});
 	}
 	
-	boolean isInteger(String text) {
+	
+	private boolean isInteger(String text) {
 		try  {
 			Integer.parseInt(text);
 			return true;

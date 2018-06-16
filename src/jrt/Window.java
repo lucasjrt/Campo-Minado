@@ -18,7 +18,6 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 
 public class Window {
-	public boolean questionMarkEnabled;
 	private int width, height;
 	Field field;
 	JFrame frame;
@@ -28,8 +27,18 @@ public class Window {
 	GridBagLayout lytField;
 	GridBagConstraints c;
 	GroupLayout lytMain;
+	Style style;
+	Images images;
+	public int buttonSize, displayWidth, displayHeight, faceSize;
+	float scale;
 	
-	public Window(int width, int height, int bombs, int difficulty) {
+	public Window(int width, int height, int bombs, int difficulty, boolean questionMark) {
+		buttonSize = 28;
+		scale = 1.1f;
+		displayWidth = (int) (26/scale);
+		displayHeight = (int) (46/scale);
+		faceSize = 32;
+		images = new Images(this);
 		this.width = width;
 		this.height = height;
 		frame = new JFrame("Campo minado");
@@ -38,19 +47,19 @@ public class Window {
 		pnlTop = new JPanel();
 		lytField = new GridBagLayout();
 		lytMain = new GroupLayout(pnlMain);
+		style = new Style();
 		c = new GridBagConstraints();
 		pnlField = new JPanel(lytField);
-		scorePanel = new ScorePanel(this);
+		scorePanel = new ScorePanel(this, faceSize);
 		pnlMain.setLayout(lytMain);
 		menuBar = new JMenuBar();
+		field.setQuestionMarkTile(questionMark);
 
 		lytMain.setHorizontalGroup(lytMain.createParallelGroup()
-				//.addComponent(menuBar)
 				.addComponent(scorePanel)
 				.addComponent(pnlField));
 		
 		lytMain.setVerticalGroup(lytMain.createSequentialGroup()
-				//.addComponent(menuBar)
 				.addComponent(scorePanel)
 				.addComponent(pnlField));
 		
@@ -60,13 +69,14 @@ public class Window {
 		field.printField();
 		pnlMain.add(scorePanel);
 		pnlMain.add(pnlField);
+		
 		frame.setResizable(false);
-		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setIconImage(field.bombTile);
+		frame.setIconImage(images.happyFace.getImage());
 		frame.add(pnlMain);
 		frame.pack();
+		frame.setLocationRelativeTo(null);
 	}
 	
 	private void buttonsAdd(JButton[][] buttons, JPanel panel) {
@@ -99,7 +109,8 @@ public class Window {
 		buttonGroup.add(medium);
 		buttonGroup.add(hard);
 		buttonGroup.add(custom);
-		questionMark.setSelected(true);
+		if(field.isQuestionMarkEnabled())
+			questionMark.setSelected(true);;
 		
 		switch(difficulty) {
 		case 1:
@@ -147,7 +158,7 @@ public class Window {
 				try {
 					this.finalize();
 					frame.setVisible(false);
-					new Window(9,9,10, 1);
+					new Window(9,9,10, 1, field.isQuestionMarkEnabled());
 				} catch (Throwable ex) {
 					ex.printStackTrace();
 				}
@@ -160,7 +171,7 @@ public class Window {
 				try {
 					this.finalize();
 					frame.setVisible(false);
-					new Window(16, 16, 40, 2);
+					new Window(16, 16, 40, 2, field.isQuestionMarkEnabled());
 				} catch (Throwable ex) {
 					ex.printStackTrace();
 				}
@@ -173,7 +184,7 @@ public class Window {
 				try {
 					this.finalize();
 					frame.setVisible(false);
-					new Window(30, 16, 99, 3);
+					new Window(30, 16, 99, 3, field.isQuestionMarkEnabled());
 				} catch (Throwable ex) {
 					ex.printStackTrace();
 				}
@@ -197,11 +208,10 @@ public class Window {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if(questionMark.isSelected()) {
-					questionMarkEnabled = true;
+					field.setQuestionMarkTile(true);
 				} else {
-					questionMarkEnabled = false;
+					field.setQuestionMarkTile(false);
 				}
-				System.out.println(questionMarkEnabled);
 			}
 		});
 		
@@ -212,11 +222,22 @@ public class Window {
 			}
 		});
 		
+		content.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				for(int i = 0; i < height; i++) {
+					for(int j = 0; j < width; j++) {
+						field.getButtons()[i][j].setIcon(images.happyFace);
+					}
+				}
+			}
+		});
+		
 		about.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JOptionPane.showMessageDialog(frame, 
-						"Desenvolvedores por: \n"
+						"Desenvolvido por: \n"
 						+ "             *Lucas Justino\n"
 						+ "             *Tarcisio Junio\n"
 						+ "Alunos de Ciência da computação na\n"
