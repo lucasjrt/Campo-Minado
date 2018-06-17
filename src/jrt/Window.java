@@ -18,19 +18,18 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 
 public class Window {
-	private int width, height;
-	Field field;
-	JFrame frame;
-	JPanel pnlMain, pnlTop, pnlField;
-	JMenuBar menuBar;
-	ScorePanel scorePanel;
-	GridBagLayout lytField;
-	GridBagConstraints c;
-	GroupLayout lytMain;
-	Style style;
-	Images images;
 	public int buttonSize, displayWidth, displayHeight, faceSize;
-	float scale;
+	public Field field;
+	public ScorePanel scorePanel;
+	public Images images;
+	private int width, height;
+	private JFrame frame;
+	private JPanel pnlMain, pnlField;
+	private JMenuBar menuBar;
+	private GridBagLayout lytField;
+	private GridBagConstraints c;
+	private GroupLayout lytMain;
+	private float scale;
 	
 	public Window(int width, int height, int bombs, int difficulty, boolean questionMark) {
 		buttonSize = 28;
@@ -44,10 +43,8 @@ public class Window {
 		frame = new JFrame("Campo minado");
 		field = new Field(width, height, this, bombs);
 		pnlMain = new JPanel();
-		pnlTop = new JPanel();
 		lytField = new GridBagLayout();
 		lytMain = new GroupLayout(pnlMain);
-		style = new Style();
 		c = new GridBagConstraints();
 		pnlField = new JPanel(lytField);
 		scorePanel = new ScorePanel(this, faceSize);
@@ -67,8 +64,6 @@ public class Window {
 		prepareMenu(difficulty);
 		buttonsAdd(field.getButtons(), pnlField);
 		field.printField();
-		pnlMain.add(scorePanel);
-		pnlMain.add(pnlField);
 		
 		frame.setResizable(false);
 		frame.setVisible(true);
@@ -111,7 +106,6 @@ public class Window {
 		buttonGroup.add(custom);
 		if(field.isQuestionMarkEnabled())
 			questionMark.setSelected(true);;
-		
 		switch(difficulty) {
 		case 1:
 			easy.setSelected(true);
@@ -211,6 +205,17 @@ public class Window {
 					field.setQuestionMarkTile(true);
 				} else {
 					field.setQuestionMarkTile(false);
+					for(int i = 0; i < height; i++) {
+						for(int j = 0; j < width; j++) {
+							if(field.getField()[i][j] == Property.BOMB_QUESTION) {
+								field.getField()[i][j] = Property.BOMB_UNOPENED;
+								field.getButtons()[i][j].setIcon(images.unopenedTile);
+							} else if (field.getField()[i][j] == Property.CLEAR_QUESTION) {
+								field.getField()[i][j] = Property.CLEAR_UNOPENED;
+								field.getButtons()[i][j].setIcon(images.unopenedTile);
+							}
+						}
+					}
 				}
 			}
 		});
@@ -227,7 +232,8 @@ public class Window {
 			public void actionPerformed(ActionEvent e) {
 				for(int i = 0; i < height; i++) {
 					for(int j = 0; j < width; j++) {
-						field.getButtons()[i][j].setIcon(images.happyFace);
+						if(field.getField()[i][j] == Property.BOMB_UNOPENED || field.getField()[i][j] == Property.CLEAR_UNOPENED)
+							field.getButtons()[i][j].setIcon(images.happyFace);
 					}
 				}
 			}

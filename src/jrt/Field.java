@@ -130,7 +130,7 @@ public class Field {
 						} 
 						
 						else if(SwingUtilities.isLeftMouseButton(e)) {
-							if(field[button.getI()][button.getJ()] == Property.CLEAR_UNOPENED) {
+							if(field[button.getI()][button.getJ()] == Property.CLEAR_UNOPENED || field[button.getI()][button.getJ()] ==  Property.CLEAR_QUESTION) {
 								if(verifyAdjBombs(button.getI(), button.getJ()) > 0) {
 									button.setIcon(window.images.numberTiles[verifyAdjBombs(button.getI(), button.getJ())]);
 									openedTiles++;
@@ -140,7 +140,7 @@ public class Field {
 								if(openedTiles >= width * height - numBombs)
 									victory();
 								field[button.getI()][button.getJ()] = Property.CLEAR_OPENED;
-							} else if (field[button.getI()][button.getJ()] == Property.BOMB_UNOPENED) {
+							} else if (field[button.getI()][button.getJ()] == Property.BOMB_UNOPENED || field[button.getI()][button.getJ()] == Property.BOMB_QUESTION) {
 								button.setIcon(window.images.clickedBombTile);
 								field[button.getI()][button.getJ()] = Property.BOMB_OPENED;
 								gameOver();
@@ -429,7 +429,7 @@ public class Field {
 	private void gameOver() {
 		for(int i = 0; i < height; i++) {
 			for(int j = 0; j < width; j++) {
-				if(field[i][j] == Property.BOMB_UNOPENED) {
+				if(field[i][j] == Property.BOMB_UNOPENED || field[i][j] == Property.BOMB_QUESTION) {
 					field[i][j] = Property.BOMB_OPENED;
 					buttons[i][j].setIcon(window.images.bombTile);
 				} else {
@@ -496,5 +496,9 @@ public class Field {
 	
 	public boolean isQuestionMarkEnabled() {
 		return questionMark;
+	}
+	
+	public Property[][] getField() {
+		return field;
 	}
 }

@@ -15,19 +15,17 @@ import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
 public class ScorePanel extends JPanel {
-	private int remainingFlags, time, faceSize;
+	private int remainingFlags, faceSize;
 	private BorderLayout layout;
 	private Window window;
 	private JButton btnFace;
 	private JPanel pnlTime, pnlBombs, pnlFace;
 	
-
 	public Timer timer;
 	public JLabel lblHundredsTime, lblTensTime, lblOnesTime, lblHundredsBombs, lblTensBombs, lblOnesBombs;
 	
 	public ScorePanel(Window window, int faceSize) {
 		this.window = window;
-		time = 0;
 		remainingFlags = window.field.getNumBombs();
 		pnlTime = new JPanel();
 		pnlBombs = new JPanel();
@@ -44,66 +42,6 @@ public class ScorePanel extends JPanel {
 		this.faceSize = faceSize;
 
 		prepareFace();
-
-		btnFace.addMouseListener(new MouseListener() {
-			private boolean isPressed = false;
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				isPressed = false;
-				if(btnFace.getIcon() == window.images.clickedHappyFace)
-					btnFace.setIcon(window.images.happyFace);
-				else if(btnFace.getIcon() == window.images.clickedDeadFace)
-					btnFace.setIcon(window.images.deadFace);
-				else if(btnFace.getIcon() == window.images.clickedGlassFace) {
-					if(isMouseIn(e,btnFace))
-						btnFace.setIcon(window.images.happyFace);
-					else
-						btnFace.setIcon(window.images.glassFace);
-				}
-				if(isMouseIn(e, btnFace)) {
-					window.field.resetGame();
-				}
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-				isPressed = true;
-				if(btnFace.getIcon() == window.images.happyFace)
-					btnFace.setIcon(window.images.clickedHappyFace);
-				else if(btnFace.getIcon() == window.images.deadFace)
-					btnFace.setIcon(window.images.clickedDeadFace);
-				else if(btnFace.getIcon() == window.images.glassFace)
-					btnFace.setIcon(window.images.clickedGlassFace);
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				if(isPressed) {
-					if(btnFace.getIcon() == window.images.clickedHappyFace)
-						btnFace.setIcon(window.images.happyFace);
-					else if(btnFace.getIcon() == window.images.clickedDeadFace)
-						btnFace.setIcon(window.images.deadFace);
-					else if(btnFace.getIcon() == window.images.clickedGlassFace)
-						btnFace.setIcon(window.images.glassFace);
-				}
-
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				if(isPressed) {
-					if(btnFace.getIcon() == window.images.happyFace)
-						btnFace.setIcon(window.images.clickedHappyFace);
-					else if(btnFace.getIcon() == window.images.deadFace)
-						btnFace.setIcon(window.images.clickedDeadFace);
-					else if(btnFace.getIcon() == window.images.glassFace)
-						btnFace.setIcon(window.images.clickedGlassFace);
-				}
-			}
-
-			@Override
-			public void mouseClicked(MouseEvent e) {}
-		});
 
 		setRemainingFlags(remainingFlags);
 
@@ -130,7 +68,7 @@ public class ScorePanel extends JPanel {
 		this.add(pnlTime, BorderLayout.EAST);
 	}
 
-	protected boolean isMouseIn(MouseEvent e, Component component) {
+	private boolean isMouseIn(MouseEvent e, Component component) {
 		if(e.getXOnScreen() >= component.getLocationOnScreen().getX() &&
 				e.getXOnScreen() <= component.getLocationOnScreen().getX() + component.getWidth() &&
 				e.getYOnScreen() >= component.getLocationOnScreen().getY() &&
@@ -143,10 +81,6 @@ public class ScorePanel extends JPanel {
 		label.setIcon(window.images.display[index]);
 	}
 		
-	public int getTime() {
-		return time;
-	}
-	
 	public void setFace(ImageIcon icon) {
 		btnFace.setIcon(icon);
 	}
@@ -157,7 +91,8 @@ public class ScorePanel extends JPanel {
 	
 	public void setRemainingFlags(int remainingFlags) {
 		this.remainingFlags = remainingFlags;
-		setDisplayLabel(lblHundredsTime, (int) (remainingFlags / 100));
+		if(window.field.getNumBombs() > 100)
+			setDisplayLabel(lblHundredsBombs, (int) (remainingFlags / 100));
 		setDisplayLabel(lblTensBombs, (int) ((remainingFlags % 100) / 10));
 		setDisplayLabel(lblOnesBombs, (int) (remainingFlags % 10));
 	}
@@ -165,9 +100,8 @@ public class ScorePanel extends JPanel {
 	public void resetTimer() {
 		if(timer.isAlive())
 			timer.stopCounting();
-		time = 0;
 		timer = new Timer(this);
-		setDisplayLabel(lblHundredsBombs, 0);
+		setDisplayLabel(lblHundredsTime, 0);
 		setDisplayLabel(lblTensTime, 0);
 		setDisplayLabel(lblOnesTime, 0);
 	}
@@ -187,16 +121,68 @@ public class ScorePanel extends JPanel {
 		btnFace.setMargin(new Insets(0, 0, 0, 0));
 		btnFace.setContentAreaFilled(false);
 		btnFace.setIcon(window.images.happyFace);
+		btnFace.addMouseListener(new MouseListener() {
+			private boolean isPressed = false;
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				isPressed = false;
+				if(btnFace.getIcon() == window.images.clickedHappyFace)
+					btnFace.setIcon(window.images.happyFace);
+				else if(btnFace.getIcon() == window.images.clickedDeadFace)
+					btnFace.setIcon(window.images.deadFace);
+				else if(btnFace.getIcon() == window.images.clickedGlassFace) {
+					if(isMouseIn(e,btnFace))
+						btnFace.setIcon(window.images.happyFace);
+					else
+						btnFace.setIcon(window.images.glassFace);
+				}
+				if(isMouseIn(e, btnFace)) {
+					window.field.resetGame();
+				}
+			}
+			@Override
+			public void mousePressed(MouseEvent e) {
+				isPressed = true;
+				if(btnFace.getIcon() == window.images.happyFace)
+					btnFace.setIcon(window.images.clickedHappyFace);
+				else if(btnFace.getIcon() == window.images.deadFace)
+					btnFace.setIcon(window.images.clickedDeadFace);
+				else if(btnFace.getIcon() == window.images.glassFace)
+					btnFace.setIcon(window.images.clickedGlassFace);
+			}
+			@Override
+			public void mouseExited(MouseEvent e) {
+				if(isPressed) {
+					if(btnFace.getIcon() == window.images.clickedHappyFace)
+						btnFace.setIcon(window.images.happyFace);
+					else if(btnFace.getIcon() == window.images.clickedDeadFace)
+						btnFace.setIcon(window.images.deadFace);
+					else if(btnFace.getIcon() == window.images.clickedGlassFace)
+						btnFace.setIcon(window.images.glassFace);
+				}
+
+			}
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				if(isPressed) {
+					if(btnFace.getIcon() == window.images.happyFace)
+						btnFace.setIcon(window.images.clickedHappyFace);
+					else if(btnFace.getIcon() == window.images.deadFace)
+						btnFace.setIcon(window.images.clickedDeadFace);
+					else if(btnFace.getIcon() == window.images.glassFace)
+						btnFace.setIcon(window.images.clickedGlassFace);
+				}
+			}
+			@Override
+			public void mouseClicked(MouseEvent e) {}
+		});
+
 	}
 	
 	public void setTimerDisplayValue(int i) {
 		setDisplayLabel(lblHundredsTime, (int) (i / 100));
 		setDisplayLabel(lblTensTime, (int) (i % 100) / 10);
 		setDisplayLabel(lblOnesTime, (int) (i % 10));
-	}
-	
-	public int getTimerDisplayValue() {
-		return time;
 	}
 }
 

@@ -43,7 +43,6 @@ public class Images {
 		}
 		
 		unopenedTile = new ImageIcon(style.resize(tiles.getSubimage(0, 0, 128, 128), buttonSize, buttonSize));
-		System.out.println("unopenedTile loaded.");
 		flagTile = new ImageIcon(style.resize(tiles.getSubimage(128, 0, 128, 128), buttonSize, buttonSize));
 		bombTile = new ImageIcon(style.resize(tiles.getSubimage(256, 0, 128, 128), buttonSize, buttonSize));
 		openedTile = new ImageIcon(style.resize(tiles.getSubimage(384, 0, 128, 128), buttonSize, buttonSize));
